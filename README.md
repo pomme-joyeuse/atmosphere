@@ -5,7 +5,7 @@
 <title>Observations — H774201001</title>
 <style>
   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:20px}
-  table{border-collapse:collapse;width:100%;max-width:800px}
+  table{border-collapse:collapse;width:100%;max-width:300px}
   th,td{border:1px solid #ddd;padding:8px;text-align:right}
   th{background:#f3f3f3;text-align:left}
   caption{font-weight:600;margin-bottom:8px;text-align:left}
@@ -13,7 +13,7 @@
 </head>
 <body>
 <table id="tbl"><caption>Observations (dernier lot)</caption>
-<thead><tr><th>Date (UTC)</th><th>Débit (m³/s)</th><th>Continuité</th></tr></thead>
+<thead><tr><th>Date (UTC)</th><th>Débit (m³/s)</th></tr></thead>
 <tbody></tbody>
 </table>
 <script>
@@ -25,11 +25,11 @@ fetch(url)
     j.data.forEach(it=>{
       const tr=document.createElement("tr");
       const d=new Date(it.date_obs).toISOString().replace("T"," ").replace("Z","");
-      tr.innerHTML=`<td style="text-align:left">${d}</td><td>${it.resultat_obs ?? "—"}</td><td style="text-align:center">${it.continuite_obs_hydro ?? "—"}</td>`;
+      tr.innerHTML=`<td style="text-align:left">${d}</td><td>${it.resultat_obs ?? "—"}</td><td style="text-align:center"></td>`;
       tbody.appendChild(tr);
     });
   })
-  .catch(e=>{ document.querySelector("tbody").innerHTML=`<tr><td colspan="3">Erreur: ${e.message}</td></tr>` });
+  .catch(e=>{ document.querySelector("tbody").innerHTML=`<tr><td colspan="2">Erreur: ${e.message}</td></tr>` });
 </script>
 </body>
 </html>
