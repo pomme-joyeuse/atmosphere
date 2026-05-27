@@ -1,4 +1,3 @@
-<!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
@@ -13,7 +12,7 @@
 </head>
 <body>
 <table id="tbl"><caption>Observations (dernier lot)</caption>
-<thead><tr><th>Date (UTC)</th><th>Débit (m³/s)</th></tr></thead>
+<thead><tr><th>Date (UTC)</th><th>Débit (l/s)</th></tr></thead>
 <tbody></tbody>
 </table>
 <script>
