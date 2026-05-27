@@ -11,7 +11,7 @@
 </style>
 </head>
 <body>
-<table id="tbl"><caption>Observations (dernier lot)</caption>
+<table id="tbl">
 <thead><tr><th>Date (UTC)</th><th>Heure (UTC)</th><th>Débit (l/s)</th></tr></thead>
 <tbody></tbody>
 </table>
