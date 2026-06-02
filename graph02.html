@@ -1,4 +1,3 @@
-
     <!DOCTYPE html>
     <html lang="fr">
     <head>
@@ -45,7 +44,7 @@
             };
             plotData.push(tracePredictions);
 
-            var layout = {"title": "Pr\u00e9dictions des hauteurs d'eau pour les 3 prochains jours", "xaxis": {"title": "Date et Heure (Europe/Paris)", "type": "date"}, "yaxis": {"title": "Hauteur d'eau (mm)"}, "hovermode": "closest", "showlegend": false};
+            var layout = {"title": "", "xaxis": {"title": "Date et Heure (Europe/Paris)", "type": "date"}, "yaxis": {"title": "Hauteur d'eau (mm)"}, "hovermode": "closest", "showlegend": false};
 
             try { // Escaped curly brace
                 Plotly.newPlot('waterHeightPlot', plotData, layout);
