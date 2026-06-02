@@ -1,0 +1,137 @@
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  body{
+    font-family:system-ui,Arial,sans-serif;
+    margin:10px;
+  }
+
+  #chart-container{
+    width:100%;
+    max-width:1000px;
+    height:400px;
+  }
+</style>
+</head>
+
+<body>
+
+
+<div id="chart-container">
+  <canvas id="rainChart"></canvas>
+</div>
+
+<script>
+
+const url =
+  "https://api.open-meteo.com/v1/forecast?latitude=49.4333&longitude=2.0833&hourly=precipitation&timezone=Europe/Paris";
+
+fetch(url)
+  .then(r => r.json())
+  .then(j => {
+
+    const times = j.hourly.time;
+    const precipitation = j.hourly.precipitation;
+
+    const labels = [];
+    const values = [];
+
+    // Maintenant
+    const now = new Date();
+
+    // Maintenant + 1 heure
+    const startDate = new Date(now.getTime() + 60 * 60 * 1000);
+
+    // Fin = J+4
+    const endDate = new Date(now);
+    endDate.setDate(endDate.getDate() + 4);
+
+    for(let i = 0; i < times.length; i++) {
+
+      const dt = new Date(times[i]);
+
+      // Filtre entre +1h et J+4
+      if(dt >= startDate && dt <= endDate) {
+
+        labels.push(
+          dt.toLocaleDateString("fr-FR", {
+            day:"2-digit",
+            month:"2-digit"
+          })
+          + " "
+          +
+          dt.toLocaleTimeString("fr-FR", {
+            hour:"2-digit",
+            minute:"2-digit"
+          })
+        );
+
+        values.push(precipitation[i] ?? 0);
+      }
+    }
+
+    // Création du graphique
+    new Chart(document.getElementById("rainChart"), {
+
+      type: "bar",
+
+      data: {
+        labels: labels,
+
+        datasets: [{
+          label: "Précipitations (mm)",
+          data: values,
+
+          backgroundColor: "rgba(54, 162, 235, 0.7)",
+          borderColor: "rgba(54, 162, 235, 1)",
+          borderWidth: 1
+        }]
+      },
+
+      options: {
+
+        responsive: true,
+
+        plugins: {
+          legend: {
+            display: true
+          }
+        },
+
+        scales: {
+
+          x: {
+            ticks: {
+              maxRotation: 90,
+              minRotation: 45
+            }
+          },
+
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: "mm"
+            }
+          }
+        }
+      }
+    });
+
+  })
+
+  .catch(e => {
+
+    document.body.innerHTML +=
+      "<p>Erreur : " + e.message + "</p>";
+
+  });
+
+</script>
+
+</body>
+</html>
