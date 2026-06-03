@@ -3,8 +3,9 @@ title {
 }
 
 h1 {
+  	color: white;
+  	text-shadow: 1px 1px 2px black, 0 0 25px blue, 0 0 5px darkblue;
 	margin-left: 20px;
-	color: #1113A1 ;
 	font-size: 30;
 	font-family: "Arial";
 	font-style: "bold";
@@ -42,7 +43,10 @@ img {
 	border: 5px #1BA3EC solid;
 	border-radius: 15px;
 }
-
+.image{
+	max-width : 60%;
+	max-height: 30%;
+}
 .pizza {
 	padding-top: 250px;
 	padding-left: 50px;

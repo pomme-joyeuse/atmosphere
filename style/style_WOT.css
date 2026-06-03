@@ -39,13 +39,14 @@ footer {
 }
 
 body {
-	background-color: #1EB060;
+	background-color: #e7b3b3;
 }
 
 img {
 	display: flex;
 	border: 5px solid #26760A;
 	border-radius: 5px;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .grid-img img {
@@ -100,4 +101,3 @@ img:hover {
 	font-size: 20px;
 	font-style: normal;
 }
-

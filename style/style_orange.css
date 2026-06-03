@@ -31,6 +31,9 @@ footer {
 	color: black;
 	font-size: 12;
 	font-style: "bold";
+	padding: 20px;
+  	background: mediumaquamarine;
+  	margin-top: 20px;
 }
 
 body {
@@ -43,4 +46,18 @@ img {
 	border-color: #E67B09;
 	border: 5px #E67B09 solid;
 	border-radius: 15px;
+}
+
+.truc {
+	grid-template-columns: 250px 250px 250px ;
+   	grid-template-rows: 500px;
+}
+
+.t {
+	display: inline-grid;
+	margin: 25px;
+}
+.topnav
+{
+	background-color: #f1bb6d;
 }
