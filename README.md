@@ -9,11 +9,11 @@
 📂 images                  # Dossier avec toutes les images du site
 📂 projet                  # Dossier avec d'auttres fichiers html, avec css voir javascript dedans
 📂 style                   # Dossier avec les styles CSS
-├── Berry.html              # Comment cuire des haricots (pour l'instant c'est que haricots blancs)       
-├── Haricots.html           #      
-├── Pois_chiches.html       #         
-├── Raspberry_cake.html     #
-├── Tea.html                #         
+├── Berry.html              # truc avec l'aquafaba       
+├── Haricots.html           # Comment cuire des haricots (pour l'instant c'est que haricots blancs)     
+├── Pois_chiches.html       # Comment cuire des pois chiches (éprouvé !)        
+├── Raspberry_cake.html     # Que faire des framboises quand il y en a trop :)
+├── Tea.html                # Comment faire du thé maison :D        
 ├── Tools.html              #       
 ├── Track.html              #          
 ├── flageolets.html         #
