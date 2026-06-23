@@ -26,8 +26,7 @@
 ````
 
  🛠️ Prérequis
-
-HTML
-CSS
+* HTML
+* CSS
 
 Libre ! 
