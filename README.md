@@ -22,7 +22,9 @@
 ├── pizza.html              #
 ├── projects.html           #       
 ├── projet_s.html           #       
-├── social.html             #                 
+├── social.html             #
+├── maps.html               # dépôt pour accéder à pleins de cartes :)
+├── carte_des_resto.html    #  Carte des restos - 23.06.2026                 
 └── README.md               #  Documentation (partielle)
 ````
 
