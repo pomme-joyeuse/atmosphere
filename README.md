@@ -1,9 +1,7 @@
-*atmosphere
-````markdown
-
 🌐 Site Web (hébergé sur GitHub Pages)
+````
 => https://pomme-joyeuse.github.io/atmosphere/
-
+````
 🐙 atmosphere
 .
 📂 images                  # Dossier avec toutes les images du site
