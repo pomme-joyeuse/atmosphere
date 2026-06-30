@@ -50,7 +50,7 @@ a
 /* Assure que la topnav aligne bien tout horizontalement */
 .topnav {
     display: flex;
-    background-color: #333; /* Couleur de fond de votre barre (à adapter) */
+    background-color: #2651E0; /* Couleur de fond de votre barre (à adapter) */
     align-items: center;
 }
 
@@ -76,7 +76,6 @@ a
 
 /* La fiche déroulante (cachée par défaut) */
 .dropdown-content {
-    display: none;          /* Cache la fiche */
     position: absolute;     /* Flotte en dessous du bouton */
     background-color: #f9f9f9;
     min-width: 160px;       /* Largeur minimale de la fiche */
