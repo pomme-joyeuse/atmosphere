@@ -2,6 +2,43 @@ title {
 	color: #1113A1 ;
 }
 
+/* Alignement horizontal de toutes les cartes */
+.container-images {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;    /* Permet de revenir à la ligne proprement si l'écran est trop petit (ex: sur téléphone) */
+    gap: 25px;          /* Espace entre chaque bloc de carte */
+    margin-top: 20px;
+}
+
+/* Style pour chaque bloc individuel (Lien + Image + Description facultative) */
+.carte-item {
+    display: flex;
+    flex-direction: column; /* Aligne le texte au-dessus de son image */
+    width: 250px;           /* Largeur fixe pour que toutes les cartes aient la même taille */
+}
+
+/* Enlever le soulignement de tous les liens à l'intérieur de nos blocs */
+.carte-item a {
+    text-decoration: none;
+    font-weight: bold;
+    margin-bottom: 8px;    /* Espace entre le texte du lien et l'image */
+}
+
+/* Ajustement de la taille des images de cartes */
+.carte-item img {
+    width: 100%;           /* L'image prend toute la largeur du bloc (250px) */
+    height: auto;          /* Conserve les proportions de l'image */
+    border-radius: 4px;    /* Optionnel : arrondit légèrement les coins des images */
+}
+
+/* Style pour le texte de description sous la carte des restos */
+.carte-item .description {
+    font-size: 0.9em;
+    color: #555;
+    margin-top: 8px;
+}
+
 h1 {
   	color: white;
   	text-shadow: 1px 1px 2px black, 0 0 25px blue, 0 0 5px darkblue;
