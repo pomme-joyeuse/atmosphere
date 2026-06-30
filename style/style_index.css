@@ -77,18 +77,18 @@ a
 /* La fiche déroulante (cachée par défaut) */
 .dropdown-content {
     position: absolute;     /* Flotte en dessous du bouton */
-    background-color: #f9f9f9;
-    min-width: 160px;       /* Largeur minimale de la fiche */
+    background-color: #2651E0;
+    min-width: 2000px;       /* Largeur minimale de la fiche */
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0,2); /* Petite ombre pour le style */
     z-index: 1;             /* S'affiche par-dessus le reste du contenu */
 }
 
 /* Style des liens à l'intérieur de la fiche déroulante */
 .dropdown-content a {
-    color: black;
+    color: #2651E0;
     padding: 12px 16px;
     display: block;         /* Aligne les liens les uns sous les autres */
-    text-align: left;
+    text-align: center;
 }
 
 /* Changement de couleur au survol des liens DANS la fiche */
