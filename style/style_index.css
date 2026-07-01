@@ -71,7 +71,7 @@ body {
 .topnav {
     display: flex;
     flex-wrap: wrap;
-    background-color: #1E5FD9;
+    background-color: #3517BD;
     align-items: center;
 }
 
@@ -90,7 +90,7 @@ body {
 
 /* Effet de survol global */
 .topnav a:hover, .dropdown:hover .dropbtn {
-    background-color: #0F663B;
+    background-color: #A6432E;
     color: midnightblue;
 }
 
@@ -103,7 +103,7 @@ body {
 .dropdown-content {
     display: none;
     position: absolute;
-    background-color: #f9f9f9;
+    background-color: #A6432E;
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 100;
@@ -118,7 +118,7 @@ body {
 }
 
 .dropdown-content a:hover {
-    background-color: #6B1616;
+    background-color: #A6432E;
     color: midnightblue;
 }
 
