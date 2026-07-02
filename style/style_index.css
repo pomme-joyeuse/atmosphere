@@ -90,7 +90,7 @@ body {
 
 /* Effet de survol global */
 .topnav a:hover, .dropdown:hover .dropbtn {
-    background-color: #A6432E;
+    background-color: #C71212;
     color: midnightblue;
 }
 
@@ -118,7 +118,7 @@ body {
 }
 
 .dropdown-content a:hover {
-    background-color: #1A995C;
+    background-color: #049421;
     color: midnightblue;
 }
 
