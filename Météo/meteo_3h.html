@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Météo Beauvais - Toutes les 3 heures</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --background-color: #f4f7f6;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-top: 0;
+            font-size: 24px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .meta {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .error {
+            color: #dc2626;
+            background-color: #fee2e2;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Prévisions Météo (Pas de 3 heures) - Beauvais</h1>
+    <div class="meta" id="update-time">Chargement des données...</div>
+
+    <div id="error-message" class="error" style="display: none;"></div>
+
+    <table id="weather-table" style="display: none;">
+        <thead>
+            <tr>
+                <th>Créneau Horaire</th>
+                <th>Temps</th>
+                <th>Temp. Moyenne</th>
+                <th>Pluie Cumulée</th>
+                <th>Vent Moyen</th>
+            </tr>
+        </thead>
+        <tbody id="weather-body">
+            <!-- Les lignes de données seront insérées ici -->
+        </tbody>
+    </table>
+    
+    <div id="loading-spinner" class="loading">Calcul de la moyenne des prévisions...</div>
+</div>
+
+<script>
+    const wmoCodes = {
+        0: "☀️ Ciel dégagé", 1: "🌤️ Principalement dégagé", 2: "⛅ Partiellement nuageux", 3: "☁️ Couvert",
+        45: "🌫️ Brouillard", 48: "🌫️ Brouillard givrant", 51: "🌧️ Bruine légère", 53: "🌧️ Bruine modérée",
+        55: "🌧️ Bruine dense", 61: "🌧️ Pluie faible", 63: "🌧️ Pluie modérée", 65: "🌧️ Pluie forte",
+        71: "❄️ Neige faible", 73: "❄️ Neige modérée", 75: "❄️ Neige forte", 80: "🌦️ Averses de pluie faibles",
+        81: "🌦️ Averses de pluie modérées", 82: "🌦️ Averses de pluie violentes", 95: "⛈️ Orage"
+    };
+
+    function getWeatherText(code) {
+        return wmoCodes[code] || `❓ Code ${code}`;
+    }
+
+    function formatTimeRange(startIso, endIso) {
+        const startDate = new Date(startIso);
+        const endDate = new Date(endIso);
+        
+        const day = startDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' });
+        const startHour = startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        const endHour = endDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        
+        return `${day} — ${startHour} à ${endHour}`;
+    }
+
+    async function fetchWeatherData() {
+        const url = "https://api.open-meteo.com/v1/forecast?latitude=49.4465&longitude=2.127167&hourly=precipitation,temperature_2m,weather_code,wind_speed_10m&timezone=Europe/Paris";
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Erreur serveur API.");
+            const data = await response.json();
+            processAndDisplay(data);
+        } catch (error) {
+            document.getElementById('loading-spinner').style.display = 'none';
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = "Erreur : " + error.message;
+            errorDiv.style.display = 'block';
+        }
+    }
+
+    function processAndDisplay(data) {
+        const hourly = data.hourly;
+        const tbody = document.getElementById('weather-body');
+        tbody.innerHTML = '';
+
+        // On regroupe les données par paquets de 3
+        const step = 3; 
+        const totalHours = hourly.time.length;
+
+        for (let i = 0; i < totalHours; i += step) {
+            // Vérification pour ne pas dépasser si le dernier bloc est incomplet
+            if (i + step > totalHours) break;
+
+            // Extraction des segments de 3 heures
+            const chunkTemp = hourly.temperature_2m.slice(i, i + step);
+            const chunkPrecip = hourly.precipitation.slice(i, i + step);
+            const chunkWind = hourly.wind_speed_10m.slice(i, i + step);
+            const chunkCodes = hourly.weather_code.slice(i, i + step);
+
+            // Calculs des moyennes et cumuls
+            const avgTemp = (chunkTemp.reduce((a, b) => a + b, 0) / step).toFixed(1);
+            const sumPrecip = chunkPrecip.reduce((a, b) => a + b, 0).toFixed(1);
+            const avgWind = (chunkWind.reduce((a, b) => a + b, 0) / step).toFixed(1);
+            
+            // Pour le code météo, on prend la valeur maximale du bloc (souvent la plus significative/critique)
+            const maxCode = Math.max(...chunkCodes);
+
+            // Création de la ligne du tableau
+            const row = document.createElement('tr');
+
+            // 1. Intervalle de temps
+            const cellTime = document.createElement('td');
+            // L'intervalle va de l'heure actuelle à l'heure + 3h
+            const endTimeIso = new Date(new Date(hourly.time[i]).getTime() + 3 * 60 * 60 * 1000).toISOString();
+            cellTime.textContent = formatTimeRange(hourly.time[i], endTimeIso);
+            row.appendChild(cellTime);
+
+            // 2. Temps représentatif
+            const cellWeather = document.createElement('td');
+            cellWeather.textContent = getWeatherText(maxCode);
+            row.appendChild(cellWeather);
+
+            // 3. Température Moyenne
+            const cellTemp = document.createElement('td');
+            cellTemp.innerHTML = `<strong>${avgTemp} °C</strong>`;
+            row.appendChild(cellTemp);
+
+            // 4. Pluie Cumulée
+            const cellPrecip = document.createElement('td');
+            cellPrecip.textContent = sumPrecip > 0 ? `${sumPrecip} mm` : "-";
+            row.appendChild(cellPrecip);
+
+            // 5. Vent Moyen
+            const cellWind = document.createElement('td');
+            cellWind.textContent = `${avgWind} km/h`;
+            row.appendChild(cellWind);
+
+            tbody.appendChild(row);
+        }
+
+        document.getElementById('loading-spinner').style.display = 'none';
+        document.getElementById('weather-table').style.display = 'table';
+        
+        const now = new Date();
+        document.getElementById('update-time').textContent = `Moyennes calculées en direct le ${now.toLocaleDateString('fr-FR')} à ${now.toLocaleTimeString('fr-FR')} (Beauvais)`;
+    }
+
+    fetchWeatherData();
+</script>
+
+</body>
+</html>
