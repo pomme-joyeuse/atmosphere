@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Météo Savigny-sur-Orge </title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --background-color: #f4f7f6;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-top: 0;
+            font-size: 24px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .meta {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .error {
+            color: #dc2626;
+            background-color: #fee2e2;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Prévisions Météo - Savigny-sur-Orge (Heure par Heure)</h1>
+    <div class="meta" id="update-time">Chargement des données...</div>
+
+    <div id="error-message" class="error" style="display: none;"></div>
+
+    <table id="weather-table" style="display: none;">
+        <thead>
+            <tr>
+                <th>Date & Heure</th>
+                <th>Temps</th>
+                <th>Température</th>
+                <th>Pluie</th>
+                <th>Vent</th>
+            </tr>
+        </thead>
+        <tbody id="weather-body">
+            </tbody>
+    </table>
+    
+    <div id="loading-spinner" class="loading">Récupération des données météo en temps réel...</div>
+</div>
+
+<script>
+    // Dictionnaire pour traduire les codes WMO de l'API en texte clair
+    const wmoCodes = {
+        0: "☀️ Ciel dégagé",
+        1: "🌤️ Principalement dégagé",
+        2: "⛅ Partiellement nuageux",
+        3: "☁️ Couvert",
+        45: "🌫️ Brouillard",
+        48: "🌫️ Brouillard givrant",
+        51: "🌧️ Bruine légère",
+        53: "🌧️ Bruine modérée",
+        55: "🌧️ Bruine dense",
+        61: "🌧️ Pluie faible",
+        63: "🌧️ Pluie modérée",
+        65: "🌧️ Pluie forte",
+        71: "❄️ Neige faible",
+        73: "❄️ Neige modérée",
+        75: "❄️ Neige forte",
+        80: "🌦️ Averses de pluie faibles",
+        81: "🌦️ Averses de pluie modérées",
+        82: "🌦️ Averses de pluie violentes",
+        95: "⛈️ Orage",
+        96: "⛈️ Orage avec grêle faible",
+        99: "⛈️ Orage avec grêle forte"
+    };
+
+    function getWeatherText(code) {
+        return wmoCodes[code] || `❓ Code inconnu (${code})`;
+    }
+
+    function formatDateTime(isoString) {
+        const date = new Date(isoString);
+        return date.toLocaleDateString('fr-FR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    async function fetchWeatherData() {
+        // L'URL contenant tous les paramètres demandés
+        const url = "https://api.open-meteo.com/v1/forecast?latitude=48.692915&longitude=2.349776&hourly=precipitation,temperature_2m,weather_code,wind_speed_10m&timezone=Europe/Paris";
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error("Impossible de joindre le serveur météo.");
+            }
+            
+            const data = await response.json();
+            displayWeather(data);
+        } catch (error) {
+            document.getElementById('loading-spinner').style.display = 'none';
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = "Erreur : " + error.message;
+            errorDiv.style.display = 'block';
+        }
+    }
+
+    function displayWeather(data) {
+        const hourly = data.hourly;
+        const tbody = document.getElementById('weather-body');
+        
+        tbody.innerHTML = '';
+
+        // On affiche les prévisions des prochaines 48 heures pour éviter un tableau interminable
+        const limitHours = 48; 
+
+        for (let i = 0; i < Math.min(hourly.time.length, limitHours); i++) {
+            const row = document.createElement('tr');
+
+            // 1. Colonne Date & Heure
+            const cellTime = document.createElement('td');
+            cellTime.textContent = formatDateTime(hourly.time[i]);
+            row.appendChild(cellTime);
+
+            // 2. Colonne Temps (Weather code)
+            const cellWeather = document.createElement('td');
+            cellWeather.textContent = getWeatherText(hourly.weather_code[i]);
+            row.appendChild(cellWeather);
+
+            // 3. Colonne Température
+            const cellTemp = document.createElement('td');
+            cellTemp.innerHTML = `<strong>${hourly.temperature_2m[i]} °C</strong>`;
+            row.appendChild(cellTemp);
+
+            // 4. Colonne Pluie
+            const cellPrecip = document.createElement('td');
+            cellPrecip.textContent = hourly.precipitation[i] > 0 ? `${hourly.precipitation[i]} mm` : "-";
+            row.appendChild(cellPrecip);
+
+            // 5. Colonne Vent
+            const cellWind = document.createElement('td');
+            cellWind.textContent = `${hourly.wind_speed_10m[i]} km/h`;
+            row.appendChild(cellWind);
+
+            tbody.appendChild(row);
+        }
+
+        // Gestion de l'affichage de l'interface
+        document.getElementById('loading-spinner').style.display = 'none';
+        document.getElementById('weather-table').style.display = 'table';
+        
+        const now = new Date();
+        document.getElementById('update-time').textContent = `Dernière mise à jour : ${now.toLocaleDateString('fr-FR')} à ${now.toLocaleTimeString('fr-FR')} (Savigny-sur-Orge)`;
+    }
+
+    // Lancement automatique dès l'exécution du fichier
+    fetchWeatherData();
+</script>
+
+</body>
+</html>
