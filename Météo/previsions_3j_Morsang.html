@@ -19,13 +19,13 @@ html, body {
   height: calc(100vh - 60px);
 }
   
-  h2{
-    text-align:center;
-    margin-bottom:5px;
-    color:#333;
-    font-size:18px;
-    font-weight:bold;
-  }
+h2 {
+  text-align: center;
+  margin-bottom: 5px;
+  color: #333;
+  font-size: 18px;
+  font-weight: bold;
+}
 </style>
 <title> Morsang-sur-Orge </title>
 </head>
@@ -53,79 +53,83 @@ fetch(url)
     const labels = [];
     const values = [];
 
-    // Maintenant
     const now = new Date();
-
-    // Maintenant + 1 heure
     const startDate = new Date(now.getTime() + 60 * 60 * 1000);
 
-    // Fin = J+4
     const endDate = new Date(now);
     endDate.setDate(endDate.getDate() + 4);
 
     for(let i = 0; i < times.length; i++) {
-
       const dt = new Date(times[i]);
-
-      // Filtre entre +1h et J+4
       if(dt >= startDate && dt <= endDate) {
-
-        labels.push(
-          dt.toLocaleDateString("fr-FR", {
-            day:"2-digit",
-            month:"2-digit"
-          })
-          + " "
-          +
-          dt.toLocaleTimeString("fr-FR", {
-            hour:"2-digit",
-            minute:"2-digit"
-          })
-        );
-
+        labels.push(dt);
         values.push(precipitation[i] ?? 0);
       }
     }
 
-    // Création du graphique
     new Chart(document.getElementById("rainChart"), {
-
       type: "bar",
-
       data: {
         labels: labels,
-
         datasets: [{
           label: "Précipitations (mm)",
           data: values,
-
           backgroundColor: "rgba(54, 162, 235, 0.7)",
           borderColor: "rgba(54, 162, 235, 1)",
           borderWidth: 1
         }]
       },
-
       options: {
-
         responsive: true,
-
         plugins: {
           legend: {
             display: true
+          },
+          tooltip: {
+            callbacks: {
+              title: function(context) {
+                const dt = new Date(labels[context[0].dataIndex]);
+                return dt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }) + " à " + dt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+              }
+            }
           }
         },
-
         scales: {
-
           x: {
+            // Désactive les lignes de grille verticales
+            grid: {
+              display: false
+            },
             ticks: {
-              maxRotation: 90,
-              minRotation: 45
+              maxRotation: 0,
+              minRotation: 0,
+              callback: function(val, index) {
+                const dt = labels[index];
+                const hour = dt.getHours();
+                
+                if (hour % 4 === 0) {
+                  const dayString = dt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
+                  const timeString = dt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+                  
+                  const previousDisplayedIndex = index - 4;
+                  const isNewDay = previousDisplayedIndex < 0 || labels[previousDisplayedIndex].getDate() !== dt.getDate();
+
+                  if (isNewDay) {
+                    return [dayString, timeString];
+                  } else {
+                    return timeString;
+                  }
+                }
+                return null;
+              }
             }
           },
-
           y: {
             beginAtZero: true,
+            // Désactive les lignes de grille horizontales
+            grid: {
+              display: false
+            },
             title: {
               display: false,
               text: "mm"
@@ -136,12 +140,8 @@ fetch(url)
     });
 
   })
-
   .catch(e => {
-
-    document.body.innerHTML +=
-      "<p>Erreur : " + e.message + "</p>";
-
+    document.body.innerHTML += "<p>Erreur : " + e.message + "</p>";
   });
 
 </script>
