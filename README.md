@@ -6,6 +6,7 @@
 🐙 atmosphere
 ````markdown
 .
+📂 Météo                   # Dossier météo
 📂 images                  # Dossier avec toutes les images du site
 📂 projet                  # Dossier avec d'auttres fichiers html, avec css voir javascript dedans
 📂 style                   # Dossier avec les styles CSS
