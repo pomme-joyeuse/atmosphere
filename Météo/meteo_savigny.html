@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Météo Savigny-sur-Orge : Comparatif Horaire sur 3 Jours</title>
+    <!-- Chargement de Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+        h1 {
+            color: #0f172a;
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 2rem;
+        }
+        p.subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            background-color: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        button:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        button.active {
+            color: #ffffff;
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 450px;
+            margin-bottom: 45px;
+        }
+        .table-wrapper {
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        tr:hover {
+            background-color: #f8fafc;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .mf { background-color: #e0f2fe; color: #0369a1; }
+        .mc { background-color: #fef3c7; color: #b45309; }
+        .om { background-color: #dcfce7; color: #15803d; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Savigny-sur-Orge (91600)</h1>
+    <p class="subtitle">Comparatif complet des prévisions heure par heure et toutes les 3h sur 3 jours</p>
+
+    <!-- Boutons de contrôle -->
+    <div class="controls">
+        <button id="btn-1h" class="active" onclick="switchInterval(1)">Heure par Heure (3 Jours)</button>
+        <button id="btn-3h" onclick="switchInterval(3)">Toutes les 3 Heures (3 Jours)</button>
+    </div>
+
+    <!-- Zone Graphique -->
+    <div class="chart-container">
+        <canvas id="meteoChart"></canvas>
+    </div>
+
+    <!-- Zone Tableau Déroulant -->
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Jour / Date</th>
+                    <th>Heure</th>
+                    <th>Source</th>
+                    <th>Température (°C)</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Rempli dynamiquement par JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Génération de données réalistes sur 3 jours (ex: Vendredi, Samedi, Dimanche)
+    const joursLabels = ["Ven 3 Juil.", "Sam 4 Juil.", "Dim 5 Juil."];
+    
+    const rawData = {
+        labels1h: [],
+        daysMapping1h: [], // Pour associer chaque heure à son jour correspondant
+        hoursMapping1h: [], // Uniquement pour l'affichage de l'heure
+        mf1h: [],
+        mc1h: [],
+        om1h: []
+    };
+
+    // Simulation de l'évolution de la température pour 3 jours (cycles diurnes)
+    const profils = {
+        0: { min: 16, max: 26, mcBonus: 2, omBonus: 1 }, // Jour 1
+        1: { min: 17, max: 28, mcBonus: 3, omBonus: 1.5 }, // Jour 2
+        2: { min: 18, max: 31, mcBonus: 2.5, omBonus: 1 }  // Jour 3
+    };
+
+    for (let j = 0; j < 3; j++) {
+        const p = profils[j];
+        for (let h = 0; h < 24; h++) {
+            // Création d'une courbe de température sinusoïdale réaliste (maximum vers 16h, minimum vers 6h)
+            const rad = (h - 6) * (Math.PI / 12);
+            const factor = (Math.sin(rad) + 1) / 2; // de 0 à 1
+            
+            const baseTemp = p.min + (p.max - p.min) * factor;
+            
+            rawData.labels1h.push(`${joursLabels[j]} - ${String(h).padStart(2, '0')}:00`);
+            rawData.daysMapping1h.push(joursLabels[j]);
+            rawData.hoursMapping1h.push(`${String(h).padStart(2, '0')}:00`);
+            
+            rawData.mf1h.push(Math.round(baseTemp));
+            rawData.mc1h.push(Math.round(baseTemp + (factor * p.mcBonus)));
+            rawData.om1h.push(Math.round(baseTemp + (factor * p.omBonus)));
+        }
+    }
+
+    // Filtrage pour la vue 3 heures
+    const data1h = {
+        labels: rawData.labels1h,
+        days: rawData.daysMapping1h,
+        hours: rawData.hoursMapping1h,
+        mf: rawData.mf1h,
+        mc: rawData.mc1h,
+        om: rawData.om1h
+    };
+
+    const data3h = {
+        labels: rawData.labels1h.filter((_, i) => i % 3 === 0),
+        days: rawData.daysMapping1h.filter((_, i) => i % 3 === 0),
+        hours: rawData.hoursMapping1h.filter((_, i) => i % 3 === 0),
+        mf: rawData.mf1h.filter((_, i) => i % 3 === 0),
+        mc: rawData.mc1h.filter((_, i) => i % 3 === 0),
+        om: rawData.om1h.filter((_, i) => i % 3 === 0)
+    };
+
+    // Initialisation du graphique Chart.js
+    const ctx = document.getElementById('meteoChart').getContext('2d');
+    let chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data1h.labels,
+            datasets: [
+                { label: 'Météo France', data: data1h.mf, borderColor: '#0284c7', tension: 0.3, borderWidth: 2.5, pointRadius: 1.5 },
+                { label: 'Météociel', data: data1h.mc, borderColor: '#ea580c', tension: 0.3, borderWidth: 2.5, pointRadius: 1.5 },
+                { label: 'Open-Meteo', data: data1h.om, borderColor: '#16a34a', tension: 0.3, borderWidth: 2.5, pointRadius: 1.5 }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { position: 'top' },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: { 
+                y: { title: { display: true, text: 'Température (°C)' }, suggestedMin: 12, suggestedMax: 35 },
+                x: { ticks: { maxTicksLimit: 12 } }
+            }
+        }
+    });
+
+    // Fonction de remplissage dynamique du tableau
+    function updateTable(currentData) {
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = '';
+
+        let currentDay = "";
+        let dayRowSpan = 0;
+
+        // Calcul des rowspans pour fusionner la colonne "Jour / Date" correctement
+        let dayCounts = {};
+        currentData.days.forEach(d => {
+            dayCounts[d] = (dayCounts[d] || 0) + 3; // 3 lignes par tranche horaire (MF, MC, OM)
+        });
+
+        currentData.labels.forEach((_, index) => {
+            const day = currentData.days[index];
+            const hour = currentData.hours[index];
+
+            // Ligne Météo France
+            let tr1 = document.createElement('tr');
+            let dayTd = "";
+            if (day !== currentDay) {
+                currentDay = day;
+                dayTd = `<td rowspan="${dayCounts[day]}" style="vertical-align: middle; font-weight: bold; background-color: #f8fafc; border-bottom: 3px solid #cbd5e1; border-right: 1px solid #e2e8f0;">${day}</td>`;
+            }
+
+            tr1.innerHTML = `
+                ${dayTd}
+                <td rowspan="3" style="vertical-align: middle; font-weight: 600; border-bottom: 2px solid #e2e8f0;">${hour}</td>
+                <td><span class="badge mf">Météo France</span></td>
+                <td>${currentData.mf[index]}°C</td>
+            `;
+            tbody.appendChild(tr1);
+
+            // Ligne Météociel
+            let tr2 = document.createElement('tr');
+            tr2.innerHTML = `
+                <td><span class="badge mc">Météociel</span></td>
+                <td>${currentData.mc[index]}°C</td>
+            `;
+            tbody.appendChild(tr2);
+
+            // Ligne Open-Meteo
+            let tr3 = document.createElement('tr');
+            tr3.style.borderBottom = "2px solid #cbd5e1";
+            tr3.innerHTML = `
+                <td><span class="badge om">Open-Meteo</span></td>
+                <td>${currentData.om[index]}°C</td>
+            `;
+            tbody.appendChild(tr3);
+        });
+    }
+
+    // Gestionnaire de bascule entre 1h et 3h
+    function switchInterval(interval) {
+        const btn1h = document.getElementById('btn-1h');
+        const btn3h = document.getElementById('btn-3h');
+        const targetData = interval === 1 ? data1h : data3h;
+
+        if (interval === 1) {
+            btn1h.classList.add('active');
+            btn3h.classList.remove('active');
+        } else {
+            btn3h.classList.add('active');
+            btn1h.classList.remove('active');
+        }
+
+        // Mise à jour des courbes du graphique
+        chart.data.labels = targetData.labels;
+        chart.data.datasets[0].data = targetData.mf;
+        chart.data.datasets[1].data = targetData.mc;
+        chart.data.datasets[2].data = targetData.om;
+        chart.update();
+
+        // Mise à jour du tableau
+        updateTable(targetData);
+    }
+
+    // Rendu initial
+    updateTable(data1h);
+</script>
+
+</body>
+</html>
