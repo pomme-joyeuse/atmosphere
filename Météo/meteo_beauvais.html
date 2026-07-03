@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Météo Savigny-sur-Orge : Graphique Mixte & Moyennes</title>
+    <title>Météo Beauvais : Graphique Mixte & Moyennes</title>
     <!-- Chargement de Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -109,7 +109,7 @@
 <body>
 
 <div class="container">
-    <h1>Savigny-sur-Orge (91600)</h1>
+    <h1>Beauvais (60000)</h1>
     <p class="subtitle">Graphique mixte (Températures en lignes & Pluie en barres) avec infobulle enrichie (Moyennes vent/temps)</p>
 
     <!-- Boutons de contrôle -->
@@ -156,11 +156,10 @@
         om: { temp: [], rain: [], wind: [], condition: [] }
     };
 
-    // Profils adaptés pour l'Essonne
     const profils = {
-        0: { min: 16, max: 26, rainBase: 0, windBase: 12, cond: "Ensoleillé" }, 
-        1: { min: 17, max: 27, rainBase: 0.6, windBase: 18, cond: "Éclaircies" }, 
-        2: { min: 18, max: 30, rainBase: 2.2, windBase: 22, cond: "Orageux" }  
+        0: { min: 14, max: 24, rainBase: 0, windBase: 15, cond: "Ensoleillé" }, 
+        1: { min: 15, max: 25, rainBase: 0.8, windBase: 20, cond: "Éclaircies" }, 
+        2: { min: 16, max: 28, rainBase: 2.5, windBase: 25, cond: "Orageux" }  
     };
 
     for (let j = 0; j < 3; j++) {
@@ -178,19 +177,19 @@
             // Météo France
             rawData.mf.temp.push(Math.round(baseTemp));
             rawData.mf.rain.push(h >= 14 && p.rainBase > 0 ? parseFloat((p.rainBase * factor).toFixed(1)) : 0);
-            rawData.mf.wind.push(Math.round(p.windBase + Math.sin(h)*4));
+            rawData.mf.wind.push(Math.round(p.windBase + Math.sin(h)*5));
             rawData.mf.condition.push(h >= 16 && p.rainBase > 1 ? "Averse" : p.cond);
 
             // Météociel
-            rawData.mc.temp.push(Math.round(baseTemp + factor * 1.2));
-            rawData.mc.rain.push(h >= 13 && p.rainBase > 0 ? parseFloat((p.rainBase * factor * 1.2).toFixed(1)) : 0);
-            rawData.mc.wind.push(Math.round(p.windBase + 2 + Math.sin(h)*3));
+            rawData.mc.temp.push(Math.round(baseTemp + factor * 1.5));
+            rawData.mc.rain.push(h >= 13 && p.rainBase > 0 ? parseFloat((p.rainBase * factor * 1.3).toFixed(1)) : 0);
+            rawData.mc.wind.push(Math.round(p.windBase + 3 + Math.sin(h)*4));
             rawData.mc.condition.push(h >= 15 && p.rainBase > 1 ? "Orage" : (factor > 0.7 ? "Dégagé" : p.cond));
 
             // Open-Meteo
-            rawData.om.temp.push(Math.round(baseTemp + factor * 0.5));
+            rawData.om.temp.push(Math.round(baseTemp + factor * 0.7));
             rawData.om.rain.push(h >= 14 && p.rainBase > 0 ? parseFloat((p.rainBase * factor * 0.9).toFixed(1)) : 0);
-            rawData.om.wind.push(Math.round(p.windBase - 1 + Math.cos(h)*3));
+            rawData.om.wind.push(Math.round(p.windBase - 2 + Math.cos(h)*3));
             rawData.om.condition.push(h >= 16 && p.rainBase > 1 ? "Pluie modérée" : p.cond);
         }
     }
@@ -269,7 +268,7 @@
                 }
             },
             scales: { 
-                yTemp: { type: 'linear', position: 'left', title: { display: true, text: 'Température (°C)' }, suggestedMin: 10, suggestedMax: 35 },
+                yTemp: { type: 'linear', position: 'left', title: { display: true, text: 'Température (°C)' }, suggestedMin: 10, suggestedMax: 32 },
                 yRain: { type: 'linear', position: 'right', title: { display: true, text: 'Précipitations (mm)' }, min: 0, max: 6, grid: { drawOnChartArea: false } },
                 x: { ticks: { maxTicksLimit: 12 } }
             }
