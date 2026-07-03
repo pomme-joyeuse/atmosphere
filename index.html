@@ -4,18 +4,20 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Index</title>
+    <!-- Feuille de style principale de la page d'accueil -->
     <link href="style/style_index.css" rel="stylesheet">
 </head>
 <body> 
-
+    <!-- En-tête de la page avec titre stylisé en ligne -->
     <div id="grad1" style="text-align:center; margin:auto; color: white; text-shadow: 2px 2px 3px black, 0 0 25px blue, 0 0 15px darkred; font-size:40px; font-weight:bold; font-family : Arial;">
         Index
     </div>
-
+    <!-- Barre de navigation principale (Topnav) -->
     <div class="topnav">
         <a href="projects.html">Projets</a>
         <a href="social.html">Media</a> 
-
+        
+        <!-- Menu déroulant : Recettes -->
         <div class="dropdown">
             <a href="#" class="dropbtn">Recettes ▾</a>
             <div class="dropdown-content">
@@ -28,6 +30,8 @@
                 <a href="legumes.html">Légumes</a>
                 <a href="Tea.html">Thé maison</a>
             </div>
+
+            <!-- Menu déroulant : Météo -->
             </div>
                 <div class="dropdown">
                     <a href="#" class="dropbtn"> Météo ▾</a>
@@ -35,6 +39,8 @@
                 <a href ="Météo\meteo_beauvais.html"> météo Beauvais </a>
                 <a href ="Météo\meteo_savigny.html"> météo Savigny-sur-Orge </a>
             </div>
+
+        <!-- Menu déroulant : Info trafic -->
         </div>
          <div class="dropdown">
             <a href="#" class="dropbtn"> Info trafic ▾</a>
@@ -47,7 +53,8 @@
             	<a href="https://www.transilien.com/fr#traffic-info-app"> Info trafic Transilien </a>
             </div>
         </div>
-
+        
+        <!-- Liens simples de la barre de navigation -->
         <a href="pictures.html">Screenshot(s)</a>
         <a href="Tools.html"> Outils </a>
         <a href="Track.html">Track</a>
@@ -57,20 +64,23 @@
         <a href="Météo\dashboard_Morsang.html">Dashboard Morsang</a>
     </div>
 
+    <!-- Section principale de contenu (Disposition en colonnes via Flexbox/Grid CSS) -->
     <div class="row">
-        
+
+        <!-- Colonne de gauche : Contenu principal et articles -->
         <div class="leftcolumn">
+            <!-- Carte 1 : Message de bienvenue -->
             <div class="card">
                 <h1>Page d'accueil</h1>
                 <p>Bienvenue sur ma page d'accueil !</p>
-                
                 <h2>Plein d'autres choses</h2>
                 <h3>Les idées viennent et repartent</h3>
                 <p>On est bien dans une démocratie</p>
                 <p>Chacun est libre de ses mouvements</p> 
                 <p>Même les idées</p>
             </div>
-            
+
+            <!-- Carte 2 : Section Recettes avec image -->
             <div class="card">
                 <h2>Des recettes plein la tête !</h2>
                 <h4>MAJ régulières</h4>
@@ -80,7 +90,9 @@
             </div>    
         </div>
 
+        <!-- Colonne de droite : Sidebar / Captures d'écran et jeux -->
         <div class="rightcolumn">
+            <!-- Carte de droite 1 : Image principale -->
             <div class="card">
                 <h2>Top pictures</h2>
                 <div class="fakeimg">
@@ -88,6 +100,8 @@
                     <p class="legend">VK 30.02 M</p>
                 </div>
             </div>
+
+            <!-- Carte de droite 2 : Galerie d'images secondaires (World of Tanks) -->
             <div class="card">
                 <h2>Some pictures</h2>
                 <div class="fakeimg">
@@ -98,6 +112,8 @@
                     <img src="images/WOT/Tiger I.png" class="e" alt="Tiger I">
                     <p class="legend">Tiger I</p>
                 </div>
+
+                <!-- Pied de page (Footer) contenant l'auteur et la date de mise à jour -->
                 <div class="fakeimg">
                     <img src="images/WOT/Ferdinand.png" class="e" alt="Ferdinand">
                     <p class="legend">Ferdinand</p>
