@@ -3,360 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Météo Savigny-sur-Orge : Graphique Mixte & Moyennes</title>
-    <!-- Chargement de Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Prévisions Météo Savigny-sur-Orge</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f1f5f9;
-            color: #1e293b;
-            margin: 0;
-            padding: 20px;
+            font-family: Arial, sans-serif;
+            margin: 20px auto;
+            padding: 0 20px;
+            background-color: #f4f7f6;
         }
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 900px; /* Limite strictement la largeur à 900 px */
+            margin: 0 auto; /* Centre le bloc sur l'écran */
+            box-sizing: border-box;
         }
-        h1 {
-            color: #0f172a;
-            text-align: center;
-            margin-bottom: 5px;
-            font-size: 2rem;
-        }
-        p.subtitle {
-            text-align: center;
-            color: #64748b;
-            margin-top: 0;
-            margin-bottom: 25px;
-        }
-        .controls {
+        .header-actions {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
             flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 10px;
         }
+        h2 { margin: 0; color: #333; }
         button {
-            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
             font-size: 14px;
-            font-weight: 600;
-            color: #475569;
-            background-color: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            font-weight: bold;
         }
-        button:hover {
-            background-color: #f1f5f9;
-            border-color: #cbd5e1;
-        }
-        button.active {
-            color: #ffffff;
-            background-color: #2563eb;
-            border-color: #2563eb;
-        }
-        .chart-container {
-            position: relative;
-            margin: auto;
-            height: 500px;
-            margin-bottom: 45px;
-        }
-        .table-wrapper {
-            max-height: 600px;
+        button:hover { background-color: #0056b3; }
+        .table-container {
+            max-height: 750px; /* Conserve une hauteur confortable pour le défilement */
             overflow-y: auto;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            text-align: left;
         }
         th, td {
-            padding: 10px 12px;
-            text-align: center;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 13px;
+            padding: 14px 16px;
+            border-bottom: 1px solid #ddd;
         }
         th {
-            background-color: #f8fafc;
-            color: #475569;
-            font-weight: 600;
+            background-color: #f8f9fa;
             position: sticky;
             top: 0;
-            z-index: 10;
+            color: #555;
+            z-index: 2;
         }
-        tr:hover {
-            background-color: #f8fafc;
+        .jour-header {
+            background-color: #e9ecef;
+            font-weight: bold;
+            color: #495057;
+            font-size: 16px;
         }
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        .mf { background-color: #e0f2fe; color: #0369a1; }
-        .mc { background-color: #fef3c7; color: #b45309; }
-        .om { background-color: #dcfce7; color: #15803d; }
+        .text-center { text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Savigny-sur-Orge (91600)</h1>
-    <p class="subtitle">Graphique mixte (Températures en lignes & Pluie en barres) avec infobulle enrichie (Moyennes vent/temps)</p>
-
-    <!-- Boutons de contrôle -->
-    <div class="controls">
-        <button id="btn-1h" class="active" onclick="switchInterval(1)">Heure par Heure (3 Jours)</button>
-        <button id="btn-3h" onclick="switchInterval(3)">Toutes les 3 Heures (3 Jours)</button>
+    <div class="header-actions">
+        <h2 id="titre-vue">📋 Prévisions Météo Savigny-sur-Orge</h2>
+        <button id="btn-vue" onclick="basculerVue()">Passer au mode 7 jours (Toutes les 3h)</button>
     </div>
-
-    <!-- Zone Graphique Mixte -->
-    <div class="chart-container">
-        <canvas id="meteoChart"></canvas>
-    </div>
-
-    <!-- Zone Tableau Déroulant Complet -->
-    <div class="table-wrapper">
+    
+    <div class="table-container">
         <table>
             <thead>
                 <tr>
-                    <th>Jour / Date</th>
-                    <th>Heure</th>
-                    <th>Source</th>
-                    <th>Temp. (°C)</th>
-                    <th>Pluie (mm)</th>
-                    <th>Vent (km/h)</th>
-                    <th>Temps</th>
+                    <th>Heure / Tranche</th>
+                    <th>Temps attendu</th>
+                    <th class="text-center">Température</th>
+                    <th class="text-center">Pluie (%) / Quantité</th>
+                    <th class="text-center">Vent</th>
                 </tr>
             </thead>
-            <tbody id="table-body">
-                <!-- Rempli dynamiquement par JS -->
+            <tbody id="tableau-meteo">
+                <tr>
+                    <td colspan="5" class="text-center">Chargement des données...</td>
+                </tr>
             </tbody>
         </table>
     </div>
 </div>
 
 <script>
-    const joursLabels = ["Ven 3 Juil.", "Sam 4 Juil.", "Dim 5 Juil."];
-    
-    const rawData = {
-        labels1h: [],
-        daysMapping1h: [], 
-        hoursMapping1h: [], 
-        mf: { temp: [], rain: [], wind: [], condition: [] },
-        mc: { temp: [], rain: [], wind: [], condition: [] },
-        om: { temp: [], rain: [], wind: [], condition: [] }
-    };
+let donneesMeteo = null;
+let mode3JoursHoraire = true;
 
-    // Profils adaptés pour l'Essonne
-    const profils = {
-        0: { min: 16, max: 26, rainBase: 0, windBase: 12, cond: "Ensoleillé" }, 
-        1: { min: 17, max: 27, rainBase: 0.6, windBase: 18, cond: "Éclaircies" }, 
-        2: { min: 18, max: 30, rainBase: 2.2, windBase: 22, cond: "Orageux" }  
-    };
+function interpreterCodeMeteo(code) {
+    if (code === 0) return "☀️ Ciel dégagé";
+    if (code >= 1 && code <= 3) return "🌤️ Éclaircies / Nuageux";
+    if (code >= 45 && code <= 48) return "🌫️ Brouillard";
+    if (code >= 51 && code <= 55) return "🌧️ Bruine légère";
+    if (code >= 61 && code <= 65) return "🌧️ Pluie";
+    if (code >= 71 && code <= 77) return "❄️ Neige";
+    if (code >= 80 && code <= 82) return "🌦️ Averses de pluie";
+    if (code >= 95 && code <= 99) return "⛈️ Orage";
+    return "❓ Inconnu";
+}
 
-    for (let j = 0; j < 3; j++) {
-        const p = profils[j];
-        for (let h = 0; h < 24; h++) {
-            const rad = (h - 6) * (Math.PI / 12);
-            const factor = (Math.sin(rad) + 1) / 2; 
-            
-            const baseTemp = p.min + (p.max - p.min) * factor;
-            
-            rawData.labels1h.push(`${joursLabels[j]} - ${String(h).padStart(2, '0')}:00`);
-            rawData.daysMapping1h.push(joursLabels[j]);
-            rawData.hoursMapping1h.push(`${String(h).padStart(2, '0')}:00`);
-            
-            // Météo France
-            rawData.mf.temp.push(Math.round(baseTemp));
-            rawData.mf.rain.push(h >= 14 && p.rainBase > 0 ? parseFloat((p.rainBase * factor).toFixed(1)) : 0);
-            rawData.mf.wind.push(Math.round(p.windBase + Math.sin(h)*4));
-            rawData.mf.condition.push(h >= 16 && p.rainBase > 1 ? "Averse" : p.cond);
+function demarrer() {
+    chargerMeteo(48.6796, 2.3452);
+}
 
-            // Météociel
-            rawData.mc.temp.push(Math.round(baseTemp + factor * 1.2));
-            rawData.mc.rain.push(h >= 13 && p.rainBase > 0 ? parseFloat((p.rainBase * factor * 1.2).toFixed(1)) : 0);
-            rawData.mc.wind.push(Math.round(p.windBase + 2 + Math.sin(h)*3));
-            rawData.mc.condition.push(h >= 15 && p.rainBase > 1 ? "Orage" : (factor > 0.7 ? "Dégagé" : p.cond));
-
-            // Open-Meteo
-            rawData.om.temp.push(Math.round(baseTemp + factor * 0.5));
-            rawData.om.rain.push(h >= 14 && p.rainBase > 0 ? parseFloat((p.rainBase * factor * 0.9).toFixed(1)) : 0);
-            rawData.om.wind.push(Math.round(p.windBase - 1 + Math.cos(h)*3));
-            rawData.om.condition.push(h >= 16 && p.rainBase > 1 ? "Pluie modérée" : p.cond);
-        }
+async function chargerMeteo(lat, lon) {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code&timezone=auto`;
+    try {
+        const response = await fetch(url);
+        donneesMeteo = await response.json();
+        genererTableau();
+    } catch (e) {
+        document.getElementById('tableau-meteo').innerHTML = `<tr><td colspan="5" class="text-center" style="color:red;">Erreur de chargement.</td></tr>`;
     }
+}
 
-    function filterData(interval) {
-        const step = interval;
-        return {
-            labels: rawData.labels1h.filter((_, i) => i % step === 0),
-            days: rawData.daysMapping1h.filter((_, i) => i % step === 0),
-            hours: rawData.hoursMapping1h.filter((_, i) => i % step === 0),
-            mf: {
-                temp: rawData.mf.temp.filter((_, i) => i % step === 0),
-                rain: rawData.mf.rain.filter((_, i) => i % step === 0),
-                wind: rawData.mf.wind.filter((_, i) => i % step === 0),
-                condition: rawData.mf.condition.filter((_, i) => i % step === 0)
-            },
-            mc: {
-                temp: rawData.mc.temp.filter((_, i) => i % step === 0),
-                rain: rawData.mc.rain.filter((_, i) => i % step === 0),
-                wind: rawData.mc.wind.filter((_, i) => i % step === 0),
-                condition: rawData.mc.condition.filter((_, i) => i % step === 0)
-            },
-            om: {
-                temp: rawData.om.temp.filter((_, i) => i % step === 0),
-                rain: rawData.om.rain.filter((_, i) => i % step === 0),
-                wind: rawData.om.wind.filter((_, i) => i % step === 0),
-                condition: rawData.om.condition.filter((_, i) => i % step === 0)
-            }
-        };
-    }
+function basculerVue() {
+    mode3JoursHoraire = !mode3JoursHoraire;
+    document.getElementById('btn-vue').innerText = mode3JoursHoraire ? "Passer au mode 7 jours (Toutes les 3h)" : "Passer au mode 3 jours (Heure par heure)";
+    genererTableau();
+}
 
-    let currentIntervalData = filterData(1);
+function genererTableau() {
+    if (!donneesMeteo) return;
+    const corps = document.getElementById('tableau-meteo');
+    corps.innerHTML = "";
 
-    function getModeCondition(idx) {
-        const c1 = currentIntervalData.mf.condition[idx];
-        const c2 = currentIntervalData.mc.condition[idx];
-        const c3 = currentIntervalData.om.condition[idx];
-        if (c1 === c2 || c1 === c3) return c1;
-        return c2;
-    }
+    const h = donneesMeteo.hourly;
+    let dernierJour = "";
 
-    const ctx = document.getElementById('meteoChart').getContext('2d');
-    let chart = new Chart(ctx, {
-        data: {
-            labels: currentIntervalData.labels,
-            datasets: [
-                { type: 'line', label: 'Météo France (°C)', data: currentIntervalData.mf.temp, borderColor: '#0284c7', tension: 0.3, borderWidth: 2, pointRadius: 1, yAxisID: 'yTemp' },
-                { type: 'line', label: 'Météociel (°C)', data: currentIntervalData.mc.temp, borderColor: '#ea580c', tension: 0.3, borderWidth: 2, pointRadius: 1, yAxisID: 'yTemp' },
-                { type: 'line', label: 'Open-Meteo (°C)', data: currentIntervalData.om.temp, borderColor: '#16a34a', tension: 0.3, borderWidth: 2, pointRadius: 1, yAxisID: 'yTemp' },
-                { type: 'bar', label: 'Pluie MF (mm)', data: currentIntervalData.mf.rain, backgroundColor: 'rgba(56, 189, 248, 0.4)', borderColor: '#38bdf8', borderWidth: 1, yAxisID: 'yRain', barPercentage: 0.6 },
-                { type: 'bar', label: 'Pluie MC (mm)', data: currentIntervalData.mc.rain, backgroundColor: 'rgba(251, 146, 60, 0.4)', borderColor: '#fb923c', borderWidth: 1, yAxisID: 'yRain', barPercentage: 0.6 },
-                { type: 'bar', label: 'Pluie OM (mm)', data: currentIntervalData.om.rain, backgroundColor: 'rgba(74, 222, 128, 0.4)', borderColor: '#4ade80', borderWidth: 1, yAxisID: 'yRain', barPercentage: 0.6 }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { 
-                legend: { position: 'top' },
-                tooltip: { 
-                    mode: 'index', 
-                    intersect: false,
-                    callbacks: {
-                        footer: function(tooltipItems) {
-                            const idx = tooltipItems[0].dataIndex;
-                            const w1 = currentIntervalData.mf.wind[idx];
-                            const w2 = currentIntervalData.mc.wind[idx];
-                            const w3 = currentIntervalData.om.wind[idx];
-                            const avgWind = Math.round((w1 + w2 + w3) / 3);
-                            
-                            const condTendance = getModeCondition(idx);
-                            
-                            return `\n[Synthèse Moyenne]\nVent moy: ${avgWind} km/h\nTendance: ${condTendance}`;
-                        }
-                    }
-                }
-            },
-            scales: { 
-                yTemp: { type: 'linear', position: 'left', title: { display: true, text: 'Température (°C)' }, suggestedMin: 10, suggestedMax: 35 },
-                yRain: { type: 'linear', position: 'right', title: { display: true, text: 'Précipitations (mm)' }, min: 0, max: 6, grid: { drawOnChartArea: false } },
-                x: { ticks: { maxTicksLimit: 12 } }
-            }
-        }
-    });
+    if (mode3JoursHoraire) {
+        document.getElementById('titre-vue').innerText = "📋 Prévisions sur 3 jours (Heure par heure) - Savigny-sur-Orge";
+        const limiteHeures = Math.min(h.time.length, 72);
 
-    function updateTable(data) {
-        const tbody = document.getElementById('table-body');
-        tbody.innerHTML = '';
+        for (let idx = 0; idx < limiteHeures; idx++) {
+            const dateObj = new Date(h.time[idx]);
+            const jourFormate = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+            const heureFormatee = dateObj.getHours() + "h";
 
-        let currentDay = "";
-        let dayCounts = {};
-        data.days.forEach(d => {
-            dayCounts[d] = (dayCounts[d] || 0) + 3; 
-        });
-
-        data.labels.forEach((_, index) => {
-            const day = data.days[index];
-            const hour = data.hours[index];
-
-            let tr1 = document.createElement('tr');
-            let dayTd = "";
-            if (day !== currentDay) {
-                currentDay = day;
-                dayTd = `<td rowspan="${dayCounts[day]}" style="vertical-align: middle; font-weight: bold; background-color: #f8fafc; border-bottom: 3px solid #cbd5e1; border-right: 1px solid #e2e8f0;">${day}</td>`;
+            if (jourFormate !== dernierJour) {
+                dernierJour = jourFormate;
+                const ligneJour = document.createElement('tr');
+                ligneJour.innerHTML = `<td colspan="5" class="jour-header">${jourFormate.toUpperCase()}</td>`;
+                corps.appendChild(ligneJour);
             }
 
-            tr1.innerHTML = `
-                ${dayTd}
-                <td rowspan="3" style="vertical-align: middle; font-weight: 600; border-bottom: 2px solid #e2e8f0;">${hour}</td>
-                <td><span class="badge mf">Météo France</span></td>
-                <td><b>${data.mf.temp[index]}°C</b></td>
-                <td>${data.mf.rain[index]} mm</td>
-                <td>${data.mf.wind[index]} km/h</td>
-                <td>${data.mf.condition[index]}</td>
+            const mmPluie = h.precipitation[idx];
+            const pluieTexte = mmPluie > 0 ? `💧 ${h.precipitation_probability[idx]}% (${mmPluie} mm)` : `💧 ${h.precipitation_probability[idx]}% (0 mm)`;
+
+            const ligne = document.createElement('tr');
+            ligne.innerHTML = `
+                <td>${heureFormatee}</td>
+                <td>${interpreterCodeMeteo(h.weather_code[idx])}</td>
+                <td class="text-center">${h.temperature_2m[idx]} °C</td>
+                <td class="text-center">${pluieTexte}</td>
+                <td class="text-center">🍃 ${h.wind_speed_10m[idx]} km/h</td>
             `;
-            tbody.appendChild(tr1);
-
-            let tr2 = document.createElement('tr');
-            tr2.innerHTML = `
-                <td><span class="badge mc">Météociel</span></td>
-                <td><b>${data.mc.temp[index]}°C</b></td>
-                <td>${data.mc.rain[index]} mm</td>
-                <td>${data.mc.wind[index]} km/h</td>
-                <td>${data.mc.condition[index]}</td>
-            `;
-            tbody.appendChild(tr2);
-
-            let tr3 = document.createElement('tr');
-            tr3.style.borderBottom = "2px solid #cbd5e1";
-            tr3.innerHTML = `
-                <td><span class="badge om">Open-Meteo</span></td>
-                <td><b>${data.om.temp[index]}°C</b></td>
-                <td>${data.om.rain[index]} mm</td>
-                <td>${data.om.wind[index]} km/h</td>
-                <td>${data.om.condition[index]}</td>
-            `;
-            tbody.appendChild(tr3);
-        });
-    }
-
-    function switchInterval(interval) {
-        const btn1h = document.getElementById('btn-1h');
-        const btn3h = document.getElementById('btn-3h');
-        currentIntervalData = filterData(interval);
-
-        if (interval === 1) {
-            btn1h.classList.add('active');
-            btn3h.classList.remove('active');
-        } else {
-            btn3h.classList.add('active');
-            btn1h.classList.remove('active');
+            corps.appendChild(ligne);
         }
+    } else {
+        document.getElementById('titre-vue').innerText = "📋 Prévisions sur 7 jours (Tranches de 3 heures) - Savigny-sur-Orge";
 
-        chart.data.labels = currentIntervalData.labels;
-        chart.data.datasets[0].data = currentIntervalData.mf.temp;
-        chart.data.datasets[1].data = currentIntervalData.mc.temp;
-        chart.data.datasets[2].data = currentIntervalData.om.temp;
-        chart.data.datasets[3].data = currentIntervalData.mf.rain;
-        chart.data.datasets[4].data = currentIntervalData.mc.rain;
-        chart.data.datasets[5].data = currentIntervalData.om.rain;
-        chart.update();
+        for (let i = 0; i < h.time.length; i += 3) {
+            const dateObj = new Date(h.time[i]);
+            const jourFormate = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+            
+            const heureFin = dateObj.getHours() + 3;
+            const trancheFormatee = `${dateObj.getHours()}h - ${heureFin === 24 ? 0 : heureFin}h`;
 
-        updateTable(currentIntervalData);
+            if (jourFormate !== dernierJour) {
+                dernierJour = jourFormate;
+                const ligneJour = document.createElement('tr');
+                ligneJour.innerHTML = `<td colspan="5" class="jour-header">${jourFormate.toUpperCase()}</td>`;
+                corps.appendChild(ligneJour);
+            }
+
+            const tSousBloc = h.temperature_2m.slice(i, i + 3);
+            const pProbSousBloc = h.precipitation_probability.slice(i, i + 3);
+            const pMmSousBloc = h.precipitation.slice(i, i + 3);
+            const vSousBloc = h.wind_speed_10m.slice(i, i + 3);
+            const codeSousBloc = h.weather_code.slice(i, i + 3);
+
+            const tMoy = (tSousBloc.reduce((a, b) => a + b, 0) / tSousBloc.length).toFixed(1);
+            const pProbMax = Math.max(...pProbSousBloc);
+            const pMmCumul = pMmSousBloc.reduce((a, b) => a + b, 0).toFixed(1);
+            const vMoy = (vSousBloc.reduce((a, b) => a + b, 0) / vSousBloc.length).toFixed(1);
+            const codeFrequent = codeSousBloc[0];
+
+            const pluieTexte = pMmCumul > 0 ? `💧 ${pProbMax}% (${pMmCumul} mm)` : `💧 ${pProbMax}% (0 mm)`;
+
+            const ligne = document.createElement('tr');
+            ligne.innerHTML = `
+                <td>${trancheFormatee}</td>
+                <td>${interpreterCodeMeteo(codeFrequent)}</td>
+                <td class="text-center">${tMoy} °C</td>
+                <td class="text-center">${pluieTexte}</td>
+                <td class="text-center">🍃 ${vMoy} km/h</td>
+            `;
+            corps.appendChild(ligne);
+        }
     }
+}
 
-    updateTable(currentIntervalData);
+demarrer();
 </script>
 
 </body>
