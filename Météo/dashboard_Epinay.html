@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Orge - Morsang</title>
+    
+    <!-- Bibliothèques nécessaires pour le graphique de pluie et la carte -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --title-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        h1 {
+            color: var(--title-color);
+            font-size: 26px;
+            margin-bottom: 5px;
+            border-bottom: 3px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        /* Grilles du dashboard */
+        .grid-top, .grid-split {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .grid-bottom {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            background-color: #f8fafc;
+            padding: 12px 16px;
+            font-weight: bold;
+            color: var(--title-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        iframe {
+            width: 100%;
+            border: none;
+            background: white;
+        }
+
+        /* Hauteurs des composants */
+        .iframe-top {
+            height: 320px;
+        }
+
+        .iframe-bottom {
+            height: 550px;
+        }
+
+        /* Conteneurs pour le graphique de pluie et la carte en JS natif */
+        .chart-container, .map-container {
+            width: 100%;
+            height: 400px;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .grid-top, .grid-split {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1> Dashboard Orge-Morsang</h1>
+
+    <!-- Partie Haute : Métriques et Débits côte à côte -->
+    <div class="grid-top">
+        <div class="card">
+            <iframe class="iframe-top" src="https://pomme-joyeuse.github.io/atmosphere/Météo/HH_Epinay.html"></iframe>
+        </div>
+
+        <div class="card">
+            <iframe class="iframe-top" src="https://pomme-joyeuse.github.io/atmosphere/Météo/debit_Epinay.html"></iframe>
+        </div>
+    </div>
+
+
+    <!-- Nouvelle Partie : Graphique Précipitations et Carte côte à côte -->
+    <div class="grid-split">
+        <div class="card">
+            <div class="card-header">Précipitations prévues (3 prochains jours)</div>
+            <div class="chart-container">
+                <canvas id="rainChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Localisation de la station — Épinay-sur-Orge</div>
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- CONFIGURATION INITIALE ---
+const lat = 48.665769;
+const lon = 2.318931;
+const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=precipitation&timezone=Europe/Paris`;
+
+// --- 1. INITIALISATION DE LA CARTE ---
+const map = L.map('map').setView([lat, lon], 14);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+// Remplacement du marqueur "goutte" par un point (cercle) bleu
+L.circleMarker([lat, lon], {
+    radius: 8,            // Taille du point bleu
+    fillColor: "#3b82f6", // Couleur de remplissage (Bleu)
+    color: "#ffffff",     // Couleur de la bordure (Blanc)
+    weight: 2,            // Épaisseur de la bordure
+    opacity: 1,           // Opacité de la bordure
+    fillOpacity: 0.9      // Opacité du remplissage
+}).addTo(map)
+.bindPopup('<b>Morsang-sur-Orge</b><br>Station hydrométrique.');
+
+// --- 2. RÉCUPÉRATION DES DONNÉES ET ACTION SUR LE GRAPHIQUE ---
+fetch(url)
+    .then(r => r.json())
+    .then(j => {
+        const times = j.hourly.time;
+        const precipitation = j.hourly.precipitation;
+
+        const labels = [];
+        const values = [];
+
+        const now = new Date();
+        const startDate = new Date(now.getTime() + 60 * 60 * 1000);
+        const endDate = new Date(now);
+        endDate.setDate(endDate.getDate() + 4);
+
+        for(let i = 0; i < times.length; i++) {
+            const dt = new Date(times[i]);
+            if(dt >= startDate && dt <= endDate) {
+                labels.push(dt);
+                values.push(precipitation[i] ?? 0);
+            }
+        }
+
+        new Chart(document.getElementById("rainChart"), {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Précipitations (mm)",
+                    data: values,
+                    backgroundColor: "rgba(54, 162, 235, 0.7)",
+                    borderColor: "rgba(54, 162, 235, 1)",
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                const dt = new Date(labels[context[0].dataIndex]);
+                                return dt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }) + " à " + dt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            maxRotation: 0,
+                            minRotation: 0,
+                            callback: function(val, index) {
+                                const dt = labels[index];
+                                const hour = dt.getHours();
+                                
+                                if (hour % 4 === 0) {
+                                    const dayString = dt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
+                                    const timeString = dt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+                                    
+                                    const previousDisplayedIndex = index - 4;
+                                    const isNewDay = previousDisplayedIndex < 0 || labels[previousDisplayedIndex].getDate() !== dt.getDate();
+
+                                    if (isNewDay) {
+                                        return [dayString, timeString];
+                                    } else {
+                                        return timeString;
+                                    }
+                                }
+                                return null;
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: false
+                        },
+                        title: {
+                            display: false,
+                            text: "mm"
+                        }
+                    }
+                }
+            }
+        });
+    })
+    .catch(e => {
+        console.error("Erreur lors de la récupération des données météo:", e);
+    });
+</script>
+
+</body>
+</html>
